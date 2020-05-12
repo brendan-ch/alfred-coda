@@ -24,12 +24,11 @@ def main(wf):
     return 0
 
   headers = {"Authorization": "Bearer %s" % key}
-  params = {"isOwner": True}
 
   res = wf.cached_data('docs', max_age=120)
   if (res == None):
     try:
-      res = requests.get("https://coda.io/apis/v1beta1/docs", headers=headers, params=params)
+      res = requests.get("https://coda.io/apis/v1beta1/docs", headers=headers)
       res.raise_for_status()
       res = res.json()
       wf.cache_data('docs', res)
