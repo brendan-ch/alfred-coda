@@ -16,13 +16,13 @@ def main(wf):
     wf.save_password('coda_token', args.apitoken)
     return 0
 
-  # try:
-  #   log.debug("Getting API token")
-  #   key = wf.get_password('coda_token')
-  # except PasswordNotFound:
-  #   wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False)
-  #   wf.send_feedback()
-  #   return 0
+  try:
+    log.debug("Getting API token")
+    key = wf.get_password('coda_token')
+  except PasswordNotFound:
+    wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False)
+    wf.send_feedback()
+    return 0
 
   res = wf.cached_data('docs', None, max_age=0)
 
