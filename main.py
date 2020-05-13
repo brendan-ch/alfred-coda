@@ -1,5 +1,6 @@
 from lib import requests
-from workflow import Workflow, ICON_ERROR, ICON_WARNING
+from workflow import Workflow, ICON_ERROR, ICON_WARNING, ICON_INFO, PasswordNotFound
+from workflow.background import run_in_background, is_running
 import sys
 import argparse
 
@@ -15,31 +16,19 @@ def main(wf):
     wf.save_password('coda_token', args.apitoken)
     return 0
 
-  try:
-    log.debug("Getting API token")
-    key = wf.get_password('coda_token')
-  except:
-    wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False)
-    wf.send_feedback()
-    return 0
+  # try:
+  #   log.debug("Getting API token")
+  #   key = wf.get_password('coda_token')
+  # except PasswordNotFound:
+  #   wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False)
+  #   wf.send_feedback()
+  #   return 0
 
-  headers = {"Authorization": "Bearer %s" % key}
+  res = wf.cached_data('docs', None, max_age=0)
 
-  res = wf.cached_data('docs', max_age=120)
-  if (res == None):
-    try:
-      res = requests.get("https://coda.io/apis/v1beta1/docs", headers=headers)
-      res.raise_for_status()
-      res = res.json()
-      wf.cache_data('docs', res)
-    except requests.exceptions.HTTPError as err:
-      wf.add_item("Unsuccessful status code", "Please check your API token and try again.", valid=False, icon=ICON_ERROR)
-      wf.send_feedback()
-      return 0
-    except requests.exceptions.ConnectionError as err:
-      wf.add_item("Connection error", "Please check your network connection and try again.", valid=False, icon=ICON_ERROR)
-      wf.send_feedback()
-      return 0
+  if (not wf.cached_data_fresh('docs', max_age=60)):
+    cmd = ['/usr/bin/python', wf.workflowfile('update.py')]
+    run_in_background('update', cmd)
 
   log.debug(res)
 
