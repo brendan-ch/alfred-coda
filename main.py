@@ -20,7 +20,7 @@ def main(wf):
     log.debug("Getting API token")
     key = wf.get_password('coda_token')
   except PasswordNotFound:
-    wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False)
+    wf.add_item("No API token found.", "Please use codatoken to set your Coda API token.", valid=False, icon=ICON_WARNING)
     wf.send_feedback()
     return 0
 
