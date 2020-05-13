@@ -31,13 +31,10 @@ def main(wf):
     cmd = ['/usr/bin/python', wf.workflowfile('update.py')]
     run_in_background('update', cmd)
 
-  error = wf.stored_data('error')
-  log.debug(error)
-
   if (wf.stored_data('error') == 1):
     wf.add_item("Coda API token is invalid", "Currently showing cached list. Please use codatoken to get the updated list.", valid=False, icon=ICON_WARNING)
 
-  log.debug(res)
+  # log.debug(res)
 
   if (res):
     if (res["items"] != []):
