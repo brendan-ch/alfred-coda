@@ -32,11 +32,15 @@ def main(wf):
 
   log.debug(res)
 
-  if (res["items"] != []):
-    for item in res["items"]:
-      wf.add_item(item["name"], item["browserLink"], valid=True, arg=item["browserLink"], icon="icons/doc.png")
-  else: 
-    wf.add_item("No documents found", icon=ICON_WARNING, valid=False)
+  if (res):
+    if (res["items"] != []):
+      for item in res["items"]:
+        wf.add_item(item["name"], item["browserLink"], valid=True, arg=item["browserLink"], icon="icons/doc.png")
+    else: 
+      wf.add_item("No documents found", icon=ICON_WARNING, valid=False)
+  
+  else:
+    wf.add_item("Cache is being populated.", "Please run the workflow again to see results.", valid=False, icon=ICON_INFO)
 
   wf.send_feedback()
   return 0
