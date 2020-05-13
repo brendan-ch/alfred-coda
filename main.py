@@ -4,6 +4,10 @@ from workflow.background import run_in_background, is_running
 import sys
 import argparse
 
+def update():
+  cmd = ['/usr/bin/python', wf.workflowfile('update.py')]
+  run_in_background('update', cmd)
+
 def main(wf):
   parser = argparse.ArgumentParser()
   
@@ -15,6 +19,7 @@ def main(wf):
     log.debug("Saving API key")
     wf.save_password('coda_token', args.apitoken)
     wf.store_data('error', 0)
+    update()
     return 0
 
   try:
@@ -27,19 +32,18 @@ def main(wf):
 
   res = wf.cached_data('docs', None, max_age=0)
 
-  if (not wf.cached_data_fresh('docs', max_age=60)):
-    cmd = ['/usr/bin/python', wf.workflowfile('update.py')]
-    run_in_background('update', cmd)
+  if (not wf.cached_data_fresh('docs', max_age=10)):
+    update()
 
   if (wf.stored_data('error') == 1):
     wf.add_item("Coda API token is invalid", "Currently showing cached list. Please use codatoken to get the updated list.", valid=False, icon=ICON_WARNING)
 
-  # log.debug(res)
+  log.debug(res)
 
   if (res):
     if (res["items"] != []):
       for item in res["items"]:
-        wf.add_item(item["name"], item["browserLink"], valid=True, arg=item["browserLink"], icon="icons/doc.png")
+        wf.add_item(item["name"], item["browserLink"], valid=True, arg=item["browserLink"], icon="icons/%s.png" % item["id"])
     else: 
       wf.add_item("No documents found", icon=ICON_WARNING, valid=False)
   

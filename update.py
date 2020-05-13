@@ -1,5 +1,6 @@
 from workflow import Workflow, PasswordNotFound
 from lib import requests
+import os
 
 def get_docs(token):
   headers = {"Authorization": "Bearer %s" % token}
@@ -20,8 +21,22 @@ def main(wf):
     def wrapper():
       return get_docs(token)
 
-    docs = wf.cached_data('docs', wrapper, max_age=120)
+    docs = wf.cached_data('docs', wrapper, max_age=1)
     wf.logger.debug("%s docs cached" % len(docs['items']))
+
+    filelist = []
+    for f in os.listdir('icons'):
+      os.remove('icons/%s' % f)  # remove existing icons in case icon was removed
+
+    for item in docs['items']:
+      try:
+        icon = requests.get(item['icon']['browserLink'])
+
+        with open("icons/%s.png" % item['id'], 'wb') as iconFile:
+          iconFile.write(icon.content)
+      except:
+        None  # silently fail if no icon found
+
     wf.store_data('error', 0)
 
   except PasswordNotFound:
