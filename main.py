@@ -14,6 +14,7 @@ def main(wf):
   if (args.apitoken):
     log.debug("Saving API key")
     wf.save_password('coda_token', args.apitoken)
+    wf.store_data('error', 0)
     return 0
 
   try:
@@ -29,6 +30,12 @@ def main(wf):
   if (not wf.cached_data_fresh('docs', max_age=60)):
     cmd = ['/usr/bin/python', wf.workflowfile('update.py')]
     run_in_background('update', cmd)
+
+  error = wf.stored_data('error')
+  log.debug(error)
+
+  if (wf.stored_data('error') == 1):
+    wf.add_item("Coda API token is invalid", "Currently showing cached list. Please use codatoken to get the updated list.", valid=False, icon=ICON_WARNING)
 
   log.debug(res)
 
